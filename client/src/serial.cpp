@@ -18,7 +18,8 @@ void initSerialPort(const std::string& portName) {
     // Convert std::string to std::wstring
     std::wstring widePortName = stringToWString(portName);
 
-    hSerial = CreateFile(widePortName.c_str(),
+    // Use CreateFileW for wide strings
+    hSerial = CreateFileW(widePortName.c_str(),
         GENERIC_READ | GENERIC_WRITE,
         0,
         0,

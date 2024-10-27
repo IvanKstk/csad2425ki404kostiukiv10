@@ -8,6 +8,7 @@ project(ClientServerProject)
 set(CMAKE_CXX_STANDARD 17)
 
 
+
 # Вказуємо директорії з заголовочними файлами
 include_directories(${CMAKE_SOURCE_DIR}/client/include)
 
@@ -17,7 +18,11 @@ add_executable(client
     ${CMAKE_SOURCE_DIR}/client/src/serial.cpp
 )
 
+add_definitions(-DUNICODE -D_UNICODE)
+
 # Вказуємо, що потрібно використовувати бібліотеку Windows
 if(WIN32)
     target_link_libraries(client PRIVATE ws2_32)
 endif()
+
+
