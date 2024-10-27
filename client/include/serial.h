@@ -9,7 +9,7 @@
 extern HANDLE hSerial;
 
 // Оголошення функцій для роботи з серійним портом
-void initSerialPort(const wchar_t* portName);
+void initSerialPort(const std::string& portName);
 void sendMessage(const char* message);
 std::string receiveMessage();
 void closeSerialPort();

@@ -10,11 +10,9 @@ void loop() {
   if (Serial.available() > 0) {
     // Отримання повідомлення
     String message = Serial.readString();
-
-    // Видалення символів нового рядка (\n або \r)
+    
     message.trim();
 
-    // Додавання "modified" без переходу на новий рядок
     message = message + " modified";
 
     // Відправка зміненого повідомлення назад

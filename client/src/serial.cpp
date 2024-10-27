@@ -1,4 +1,3 @@
-#pragma once
 #include <iostream>
 #include <windows.h>
 #include <string>
@@ -10,8 +9,16 @@ HANDLE hSerial;
 DCB dcbSerialParams = { 0 };
 COMMTIMEOUTS timeouts = { 0 };
 
-void initSerialPort(const wchar_t* portName) {
-    hSerial = CreateFile(portName,
+// Helper function to convert std::string to std::wstring
+std::wstring stringToWString(const std::string& str) {
+    return std::wstring(str.begin(), str.end());
+}
+
+void initSerialPort(const std::string& portName) {
+    // Convert std::string to std::wstring
+    std::wstring widePortName = stringToWString(portName);
+
+    hSerial = CreateFile(widePortName.c_str(),
         GENERIC_READ | GENERIC_WRITE,
         0,
         0,

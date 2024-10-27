@@ -6,7 +6,7 @@ using namespace std;
 
 int main() {
     // Use the correct COM port (replace "COM3" with your port)
-    initSerialPort(L"COM3");
+    initSerialPort("\\\\.\\COM3");
 
     // Send message
     sendMessage("Hello, Arduino!\n");
