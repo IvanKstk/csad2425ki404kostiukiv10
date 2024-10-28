@@ -46,4 +46,15 @@ Main development branch: **develop**
 For the upcoming tasks, the following languages, and hardware will be used:
 
 - **Programming Language**: C/C++ or Java
-- **Hardware**: Arduino Mega2560
+- **Hardware**: Arduino Mega2560 
+
+
+## Task_2
+
+1. Create a simple communication schema SW(client)
+<-> UART <-> HW(server).
+2. The client should send a message to the server. The server should modify the message and send it back to the client.
+3. Create YML file with next features:
+a. build all binaries (create scripts in folder ci/ if need);
+b. run tests;
+c. create artifacts with binaries and test reports;
