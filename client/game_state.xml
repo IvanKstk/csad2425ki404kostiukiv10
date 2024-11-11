@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<GameState>
+    <GameMode>1</GameMode>
+    <Game>
+        <Player1>paper</Player1>
+        <Player2>paper</Player2>
+        <Result>draw</Result>
+        <Statistics>
+            <Player1Wins>0</Player1Wins>
+            <Player2Wins>1</Player2Wins>
+            <Draws>1</Draws>
+            <TotalGames>2</TotalGames>
+        </Statistics>
+    </Game>
+</GameState>
