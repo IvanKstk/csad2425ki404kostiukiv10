@@ -1,3 +1,8 @@
+/**
+ * @file main.cpp
+ * @brief Entry point for the Rock-Paper-Scissors game application, managing game initialization, mode selection, and serial communication.
+ */
+
 #include <iostream>
 #include <string>
 #include "menu.h"
@@ -9,13 +14,29 @@ using namespace std;
 
 int currentGameMode = -1;
 
+/**
+ * @brief Initializes a new game with the specified game mode.
+ *
+ * Resets game statistics and sets the initial state based on the selected game mode.
+ * This function also prepares the game for a fresh start, resetting any previous data.
+ *
+ * @param gameMode The selected game mode (e.g., 1 for Man vs AI, 2 for Man vs Man).
+ */
 void initializeNewGame(int gameMode) {
     currentGameMode = gameMode;
     resetStatistics();
     totalGames = 0;
-    saveGameState("", "", "", currentGameMode, true); // Keeps the initial state with reset statistics
+    saveGameState("", "", "", currentGameMode, true); 
 }
 
+/**
+ * @brief Main function of the program.
+ *
+ * Initializes the serial port connection, prompts the user to start a new game or load a saved one, and manages the game loop.
+ * The function handles user input, manages different game modes, and saves game progress.
+ *
+ * @return int Returns 0 upon successful program execution.
+ */
 int main() {
     cout << "[info] Starting program..." << endl;
     initSerialPort("\\\\.\\COM3");
@@ -68,7 +89,7 @@ int main() {
     }
 
     while (true) {
-        // After loading a saved game or selecting a new mode
+        
         while (true) {
             switch (currentGameMode) {
             case 1:
@@ -106,7 +127,6 @@ int main() {
             }
         }
 
-        // Ask the user if they want to choose another mode or exit
         cout << "\nDo you want to select a different game mode or exit? (1 for Select Mode, 0 for Exit): ";
         int nextAction;
         while (!(cin >> nextAction) || (nextAction != 1 && nextAction != 0)) {

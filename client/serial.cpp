@@ -1,3 +1,8 @@
+/**
+ * @file serial.cpp
+ * @brief Provides functions for serial port communication, including initialization, sending, and receiving messages.
+ */
+
 #pragma once
 #include <iostream>
 #include <windows.h>
@@ -10,16 +15,28 @@ HANDLE hSerial;
 DCB dcbSerialParams = { 0 };
 COMMTIMEOUTS timeouts = { 0 };
 
-// Helper function to convert std::string to std::wstring
+/**
+ * @brief Helper function to convert a std::string to a std::wstring.
+ *
+ * Converts a standard string to a wide string to enable compatibility with Windows API functions that require wide strings.
+ *
+ * @param str The input string to convert.
+ * @return std::wstring The converted wide string.
+ */
 std::wstring stringToWString(const std::string& str) {
     return std::wstring(str.begin(), str.end());
 }
 
+/**
+ * @brief Initializes the serial port with specified settings.
+ *
+ * Opens the specified serial port, sets communication parameters such as baud rate and byte size, and applies timeouts.
+ *
+ * @param portName The name of the serial port (e.g., "\\\\.\\COM3").
+ */
 void initSerialPort(const std::string& portName) {
-    // Convert std::string to std::wstring
     std::wstring widePortName = stringToWString(portName);
 
-    // Use CreateFileW for wide strings
     hSerial = CreateFileW(widePortName.c_str(),
         GENERIC_READ | GENERIC_WRITE,
         0,
@@ -50,12 +67,26 @@ void initSerialPort(const std::string& portName) {
     cout << "Serial port configured." << endl;
 }
 
+/**
+ * @brief Sends a message over the serial port.
+ *
+ * Writes the provided message to the serial port and displays it in the console.
+ *
+ * @param message A C-string representing the message to send.
+ */
 void sendMessage(const char* message) {
     DWORD bytesWritten;
     WriteFile(hSerial, message, strlen(message), &bytesWritten, NULL);
     cout << "Sent by PC: " << message << endl;
 }
 
+/**
+ * @brief Receives a message from the serial port.
+ *
+ * Reads data from the serial port into a buffer and returns it as a string. If no data is read, returns an empty string.
+ *
+ * @return std::string The message received from the serial port, or an empty string if no data was read.
+ */
 std::string receiveMessage() {
     char buffer[1024] = { 0 };
     DWORD bytesRead;
@@ -69,6 +100,11 @@ std::string receiveMessage() {
     }
 }
 
+/**
+ * @brief Closes the serial port.
+ *
+ * Closes the handle to the serial port and displays a message in the console.
+ */
 void closeSerialPort() {
     CloseHandle(hSerial);
     cout << "Serial port closed." << endl;

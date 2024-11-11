@@ -1,3 +1,8 @@
+/**
+ * @file game.cpp
+ * @brief Contains functions for managing game state, processing player choices, and handling game statistics.
+ */
+
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -7,10 +12,16 @@
 
 using namespace std;
 
-// Global variables for statistics
-int player1Wins = 0, player2Wins = 0, draws = 0, totalGames = 0;
-int lastGameMode = -1;  // Initial value to determine the mode change
 
+int player1Wins = 0, player2Wins = 0, draws = 0, totalGames = 0;
+int lastGameMode = -1;  
+
+/**
+ * @brief Converts a numeric choice to the corresponding move string.
+ *
+ * @param number The number representing a move (1 for rock, 2 for scissors, 3 for paper).
+ * @return std::string The string representation of the move ("rock", "scissors", "paper").
+ */
 std::string getChoiceFromNumber(int number) {
     if (number == 1) return "rock";
     else if (number == 2) return "scissors";
@@ -18,6 +29,13 @@ std::string getChoiceFromNumber(int number) {
     return "";
 }
 
+/**
+ * @brief Gets the user's choice for the game (rock, scissors, or paper).
+ *
+ * Prompts the user to enter a number corresponding to a move and validates the input.
+ *
+ * @return std::string The string representation of the user's move ("rock", "scissors", or "paper").
+ */
 std::string getUserChoice() {
     int choice;
     while (true) {
@@ -35,6 +53,17 @@ std::string getUserChoice() {
     }
 }
 
+/**
+ * @brief Parses the response from Arduino to extract moves and results.
+ *
+ * Uses regular expressions to parse JSON-like formatted response from Arduino, extracting
+ * the moves of Player 1 and Player 2, as well as the game result.
+ *
+ * @param response The response string received from Arduino.
+ * @param player1 Reference to the string storing Player 1's move.
+ * @param player2 Reference to the string storing Player 2's move or server move.
+ * @param result Reference to the string storing the game result.
+ */
 void parseResponse(const std::string& response, std::string& player1, std::string& player2, std::string& result) {
     std::regex player1Regex("\"Player1\": \"(.*?)\"");
     std::regex player2Regex("\"Player2\": \"(.*?)\"");
@@ -58,6 +87,9 @@ void parseResponse(const std::string& response, std::string& player1, std::strin
     }
 }
 
+/**
+ * @brief Resets game statistics, including win counts and total games.
+ */
 void resetStatistics() {
     player1Wins = 0;
     player2Wins = 0;
@@ -65,14 +97,26 @@ void resetStatistics() {
     totalGames = 0;
 }
 
+/**
+ * @brief Saves the current game state to an XML file.
+ *
+ * Writes the game mode, player moves, result, and statistics to "game_state.xml". If the game mode has changed,
+ * statistics are reset. This function is called after each game round to update the saved game state.
+ *
+ * @param player1 The move chosen by Player 1.
+ * @param player2 The move chosen by Player 2.
+ * @param result The result of the game round.
+ * @param currentGameMode The current game mode (e.g., 1 for Man vs AI).
+ * @param resetStats If true, resets statistics when the game mode changes.
+ */
 void saveGameState(const std::string& player1, const std::string& player2, const std::string& result, int currentGameMode, bool resetStats = true) {
     if (resetStats && currentGameMode != lastGameMode) {
         resetStatistics();
-        totalGames = 0;  // Reset the total number of games when changing the mode
+        totalGames = 0;  
         lastGameMode = currentGameMode;
     }
 
-    if (!player1.empty() && !player2.empty()) {  // Increment totalGames only after the game is complete
+    if (!player1.empty() && !player2.empty()) {  
         totalGames++;
         if (result == "Player 1 wins") {
             player1Wins++;
@@ -85,7 +129,6 @@ void saveGameState(const std::string& player1, const std::string& player2, const
         }
     }
 
-    // Write to file
     std::ofstream file("game_state.xml");
     if (!file.is_open()) {
         std::cerr << "Error opening file for writing!" << std::endl;
@@ -112,6 +155,18 @@ void saveGameState(const std::string& player1, const std::string& player2, const
     std::cout << "Game state saved to game_state.xml" << std::endl;
 }
 
+/**
+ * @brief Loads the saved game state from an XML file.
+ *
+ * Reads the game mode, player moves, result, and statistics from "game_state.xml". If the file does not exist or
+ * cannot be read, it returns false.
+ *
+ * @param player1 Reference to the string storing Player 1's last move.
+ * @param player2 Reference to the string storing Player 2's last move.
+ * @param result Reference to the string storing the last game result.
+ * @param currentGameMode Reference to the integer storing the last game mode.
+ * @return bool Returns true if the game state was loaded successfully; false otherwise.
+ */
 bool loadGameState(std::string& player1, std::string& player2, std::string& result, int& currentGameMode) {
     std::ifstream file("game_state.xml");
     std::string line;

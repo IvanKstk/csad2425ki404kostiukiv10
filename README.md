@@ -58,3 +58,14 @@ For the upcoming tasks, the following languages, and hardware will be used:
 a. build all binaries (create scripts in folder ci/ if need);
 b. run tests;
 c. create artifacts with binaries and test reports;
+
+## Task_3
+
+1. Develop Server and Client.
+2. Required steps.
+
+## Task_4
+
+1. Add doxygen comments for all public functions, classes, properties, fields...
+2. Generate documentation based on doxygen comments
+3. Required steps
