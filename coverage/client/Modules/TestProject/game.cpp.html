@@ -1,0 +1,190 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+        <meta charset="utf-8"/>
+	    <title>game.cpp</title>
+	    <link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	    <script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+    <body onload="prettyPrint()">
+        <h4></h4>
+        <pre class="prettyprint lang-cpp linenums">
+
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;fstream&gt;
+#include &lt;regex&gt;
+#include "game.h"
+#include "serial.h"
+
+using namespace std;
+
+int player1Wins = 0, player2Wins = 0, draws = 0, totalGames = 0;
+int lastGameMode = -1;
+
+<span style = "background-color:#dfd">std::string getChoiceFromNumber(int number) {
+    if (number == 1) return "rock";
+    else if (number == 2) return "scissors";
+    else if (number == 3) return "paper";
+    return "";
+}</span>
+
+<span style = "background-color:#dfd">std::string getUserChoice() {</span>
+    int choice;
+<span style = "background-color:#dfd">    while (true) {
+        std::cout &lt;&lt; "Enter 1 for rock, 2 for scissors, or 3 for paper: ";
+        if (std::cin &gt;&gt; choice &amp;&amp; (choice &gt;= 1 &amp;&amp; choice &lt;= 3)) {
+            if (choice == 1) return "rock";
+            if (choice == 2) return "scissors";
+            return "paper";</span>
+<span style = "background-color:#fdd">        }</span>
+        else {
+<span style = "background-color:#dfd">            std::cout &lt;&lt; "[error] Invalid choice. Please enter 1, 2, or 3." &lt;&lt; std::endl;
+            std::cin.clear();
+            std::cin.ignore(10000, '\n');</span>
+        }
+<span style = "background-color:#dfd">    }
+}</span>
+
+<span style = "background-color:#dfd">void parseResponse(const std::string&amp; response, std::string&amp; player1, std::string&amp; player2, std::string&amp; result) {
+    std::regex player1Regex("\"Player1\": \"(.*?)\"");
+    std::regex player2Regex("\"Player2\": \"(.*?)\"");
+    std::regex serverRegex("\"Server\": \"(.*?)\"");
+    std::regex resultRegex("\"Result\": \"(.*?)\"");
+    std::smatch match;</span>
+
+<span style = "background-color:#dfd">    if (std::regex_search(response, match, player1Regex) &amp;&amp; match.size() &gt; 1) {
+        player1 = match.str(1);</span>
+    }
+
+<span style = "background-color:#dfd">    if (std::regex_search(response, match, player2Regex) &amp;&amp; match.size() &gt; 1) {
+        player2 = match.str(1);
+    }
+    else if (std::regex_search(response, match, serverRegex) &amp;&amp; match.size() &gt; 1) {
+        player2 = match.str(1);</span>
+    }
+
+<span style = "background-color:#dfd">    if (std::regex_search(response, match, resultRegex) &amp;&amp; match.size() &gt; 1) {
+        result = match.str(1);</span>
+    }
+<span style = "background-color:#dfd">}</span>
+
+<span style = "background-color:#dfd">void resetStatistics() {
+    player1Wins = 0;
+    player2Wins = 0;
+    draws = 0;
+    totalGames = 0;
+}</span>
+
+<span style = "background-color:#dfd">void saveGameState(const std::string&amp; player1, const std::string&amp; player2, const std::string&amp; result, int currentGameMode, bool resetStats = true) {
+    if (resetStats &amp;&amp; currentGameMode != lastGameMode) {
+        resetStatistics();
+        totalGames = 0;
+        lastGameMode = currentGameMode;</span>
+    }
+
+<span style = "background-color:#dfd">    if (!player1.empty() &amp;&amp; !player2.empty()) {
+        totalGames++;
+        if (result == "Player 1 wins") {
+            player1Wins++;
+        }
+        else if (result == "Player 2 wins") {
+            player2Wins++;
+        }
+        else if (result == "draw") {
+            draws++;</span>
+        }
+    }
+
+<span style = "background-color:#dfd">    std::ofstream file("game_state.xml");
+    if (!file.is_open()) {
+        std::cerr &lt;&lt; "Error opening file for writing!" &lt;&lt; std::endl;
+        return;</span>
+    }
+
+<span style = "background-color:#dfd">    file &lt;&lt; "&lt;?xml version=\"1.0\"?&gt;\n";
+    file &lt;&lt; "&lt;GameState&gt;\n";
+    file &lt;&lt; "    &lt;GameMode&gt;" &lt;&lt; currentGameMode &lt;&lt; "&lt;/GameMode&gt;\n";
+    file &lt;&lt; "    &lt;Game&gt;\n";
+    file &lt;&lt; "        &lt;Player1&gt;" &lt;&lt; player1 &lt;&lt; "&lt;/Player1&gt;\n";
+    file &lt;&lt; "        &lt;Player2&gt;" &lt;&lt; player2 &lt;&lt; "&lt;/Player2&gt;\n";
+    file &lt;&lt; "        &lt;Result&gt;" &lt;&lt; result &lt;&lt; "&lt;/Result&gt;\n";
+    file &lt;&lt; "        &lt;Statistics&gt;\n";
+    file &lt;&lt; "            &lt;Player1Wins&gt;" &lt;&lt; player1Wins &lt;&lt; "&lt;/Player1Wins&gt;\n";
+    file &lt;&lt; "            &lt;Player2Wins&gt;" &lt;&lt; player2Wins &lt;&lt; "&lt;/Player2Wins&gt;\n";
+    file &lt;&lt; "            &lt;Draws&gt;" &lt;&lt; draws &lt;&lt; "&lt;/Draws&gt;\n";
+    file &lt;&lt; "            &lt;TotalGames&gt;" &lt;&lt; totalGames &lt;&lt; "&lt;/TotalGames&gt;\n";
+    file &lt;&lt; "        &lt;/Statistics&gt;\n";
+    file &lt;&lt; "    &lt;/Game&gt;\n";
+    file &lt;&lt; "&lt;/GameState&gt;\n";</span>
+
+<span style = "background-color:#dfd">    file.close();
+    std::cout &lt;&lt; "Game state saved to game_state.xml" &lt;&lt; std::endl;
+}</span>
+
+<span style = "background-color:#dfd">bool loadGameState(std::string&amp; player1, std::string&amp; player2, std::string&amp; result, int&amp; currentGameMode) {
+    std::ifstream file("game_state.xml");
+    std::string line;
+    bool hasData = false;</span>
+
+<span style = "background-color:#dfd">    if (!file.is_open()) {
+        std::cerr &lt;&lt; "No saved game found." &lt;&lt; std::endl;
+        return false;</span>
+    }
+
+<span style = "background-color:#dfd">    std::regex modeRegex("&lt;GameMode&gt;(.*?)&lt;/GameMode&gt;");
+    std::regex player1Regex("&lt;Player1&gt;(.*?)&lt;/Player1&gt;");
+    std::regex player2Regex("&lt;Player2&gt;(.*?)&lt;/Player2&gt;");
+    std::regex resultRegex("&lt;Result&gt;(.*?)&lt;/Result&gt;");
+    std::regex player1WinsRegex("&lt;Player1Wins&gt;(\\d+)&lt;/Player1Wins&gt;");
+    std::regex player2WinsRegex("&lt;Player2Wins&gt;(\\d+)&lt;/Player2Wins&gt;");
+    std::regex drawsRegex("&lt;Draws&gt;(\\d+)&lt;/Draws&gt;");
+    std::regex totalGamesRegex("&lt;TotalGames&gt;(\\d+)&lt;/TotalGames&gt;");
+    std::smatch match;</span>
+
+<span style = "background-color:#dfd">    while (std::getline(file, line)) {
+        if (std::regex_search(line, match, modeRegex) &amp;&amp; match.size() &gt; 1) {
+            currentGameMode = std::stoi(match.str(1));
+            hasData = true;</span>
+        }
+<span style = "background-color:#dfd">        if (std::regex_search(line, match, player1Regex) &amp;&amp; match.size() &gt; 1) {
+            player1 = match.str(1);</span>
+        }
+<span style = "background-color:#dfd">        if (std::regex_search(line, match, player2Regex) &amp;&amp; match.size() &gt; 1) {
+            player2 = match.str(1);</span>
+        }
+<span style = "background-color:#dfd">        if (std::regex_search(line, match, resultRegex) &amp;&amp; match.size() &gt; 1) {
+            result = match.str(1);</span>
+        }
+<span style = "background-color:#dfd">        if (std::regex_search(line, match, player1WinsRegex) &amp;&amp; match.size() &gt; 1) {
+            player1Wins = std::stoi(match.str(1));</span>
+        }
+<span style = "background-color:#dfd">        if (std::regex_search(line, match, player2WinsRegex) &amp;&amp; match.size() &gt; 1) {
+            player2Wins = std::stoi(match.str(1));</span>
+        }
+<span style = "background-color:#dfd">        if (std::regex_search(line, match, drawsRegex) &amp;&amp; match.size() &gt; 1) {
+            draws = std::stoi(match.str(1));</span>
+        }
+<span style = "background-color:#dfd">        if (std::regex_search(line, match, totalGamesRegex) &amp;&amp; match.size() &gt; 1) {
+            totalGames = std::stoi(match.str(1));</span>
+        }
+<span style = "background-color:#dfd">    }</span>
+
+<span style = "background-color:#dfd">    file.close();
+    return hasData;
+}</span></pre>
+        <hr />
+        <table width="100%">
+            <thead>
+                <tr>
+                    <th align="center">
+                        <small>Generated by</small>
+                        <a href="https://github.com/OpenCppCoverage/OpenCppCoverage/releases">
+                            <strong>OpenCppCoverage (Version: 0.9.9.0)</strong>
+                        </a>
+                    </th>
+                </tr>
+            </thead>
+        </table>
+    </body>
+</html>
